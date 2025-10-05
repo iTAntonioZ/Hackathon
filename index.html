@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprendamos en el espacio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .book-container {
+            perspective: 2500px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .book {
+            width: 900px;
+            height: 600px;
+            display: flex;
+            gap: 0;
+        }
+
+        .book-page {
+            width: 450px;
+            height: 600px;
+            position: relative;
+            background: linear-gradient(135deg, #0a1128 0%, #1a1f3a 100%);
+            border: 3px solid #4a5d8f;
+            box-shadow: 
+                inset 0 0 50px rgba(74, 93, 143, 0.3),
+                0 0 30px rgba(74, 93, 143, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .book-page:hover {
+            box-shadow: 
+                inset 0 0 50px rgba(74, 93, 143, 0.5),
+                0 0 50px rgba(74, 93, 143, 0.8);
+        }
+
+        .left-page {
+            border-right: 1.5px solid #4a5d8f;
+        }
+
+        .left-page.hidden {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .right-page {
+            border-left: 1.5px solid #4a5d8f;
+        }
+
+        .page-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .page-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            padding: 40px;
+        }
+
+        .text-item {
+            position: absolute;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #e0e6ff;
+            max-width: 85%;
+            text-shadow: 0 0 10px rgba(74, 93, 143, 0.5);
+        }
+
+        .nav-hint {
+            position: absolute;
+            bottom: 20px;
+            font-size: 14px;
+            color: #8a9dc9;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .left-page .nav-hint {
+            left: 20px;
+        }
+
+        .right-page .nav-hint {
+            right: 20px;
+        }
+
+        .book-page:hover .nav-hint {
+            opacity: 1;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            font-size: 16px;
+            color: #8a9dc9;
+            font-weight: bold;
+        }
+
+        .left-page .page-number {
+            left: 20px;
+        }
+
+        .right-page .page-number {
+            right: 20px;
+        }
+
+        .corner-decoration {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #4a5d8f;
+            opacity: 0.5;
+        }
+
+        .corner-tl {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-tr {
+            top: 10px;
+            right: 10px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-bl {
+            bottom: 10px;
+            left: 10px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-br {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        @media (max-width: 950px) {
+            .book {
+                width: 700px;
+                height: 467px;
+            }
+
+            .book-page {
+                width: 350px;
+                height: 467px;
+            }
+
+            .text-item {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 750px) {
+            .book {
+                width: 500px;
+                height: 333px;
+            }
+
+            .book-page {
+                width: 250px;
+                height: 333px;
+            }
+
+            .page-content {
+                padding: 25px;
+            }
+
+            .text-item {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="stars" id="stars"></div>
+
+    <div class="book-container">
+        <div class="book">
+            <div class="book-page left-page" onclick="previousPage()">
+                <div class="page-background" id="leftBackground"></div>
+                <div class="page-content" id="leftContent">
+                    <div class="corner-decoration corner-tl"></div>
+                    <div class="corner-decoration corner-bl"></div>
+                </div>
+                <div class="nav-hint">← Anterior</div>
+                <div class="page-number" id="leftPageNumber"></div>
+            </div>
+
+            <div class="book-page right-page" onclick="nextPage()">
+                <div class="page-background" id="rightBackground"></div>
+                <div class="page-content" id="rightContent">
+                    <div class="corner-decoration corner-tr"></div>
+                    <div class="corner-decoration corner-br"></div>
+                </div>
+                <div class="nav-hint">Siguiente →</div>
+                <div class="page-number" id="rightPageNumber"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        const bookData = {
+            cover: './assets/uno.jpg',
+            pages: [
+                {
+                    background: '/assets/dos.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 1',
+                            position: [80, 30],
+                            width: 300
+                        },
+                        {
+                            content: "En un lugar no muy lejano…\nEn lo alto del cielo, a 35,786 kilómetros sobre el ecuador terrestre, un satélite llamado GOES-U está de guardia. Vigila el clima, avisa de huracanes y ayuda a los meteorólogos a predecir el tiempo.\nPero un día… ¡se apagó!\nEl Sol había lanzado una tormenta espacial, como un gran estornudo de fuego y magnetismo.\nUn astronauta se preparó para ayudarlo.\nNo tenía nombre. Solo quería que el satélite volviera a brillar.\nIlustración sugerida:\nUn satélite con luces parpadeando y una burbuja de energía del Sol acercándose. Un astronauta mira preocupado por la ventana de la nave.",
+                            position: [10, 70],
+                            width: 440
+                        }
+                    ]
+                },
+                {
+                    background: './assets/tres.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 2',
+                            position: [80, 20],
+                            width: 246
+                        },
+                        {
+                                content: "25 de enero de 2026\nFaltaban 12 días para el lanzamiento.\nEl astronauta revisó su traje protector.\n—¿Qué es el clima espacial?, le preguntó a su compañero.\n—Es lo que pasa cuando el Sol \"tose\" y envía polvo hacia la Tierra, explicó.\n—¿Como un estornudo?\n—¡Exacto! El Sol lanza llamaradas solares (como llamas de luz), una explosión del sol (nubes gigantes de magnetismo) y viento solar (polvo que viajan por el espacio). \nEl astronauta sonrió:\n—Entonces hoy voy a reparar un satélite… ¡y a aprender cómo el Sol nos habla!\n¿Sabías que?\nLos satélites como el GOES-U están siempre sobre la Tierra, nunca viajan a Marte.\nEstán tan lejos que dan una vuelta completa al planeta en 24 horas, igual que la Tierra gira.",
+                            position: [10, 60],
+                            width: 450,
+                        },
+                        {
+                            content: '',
+                            position: [10, 70],
+                            width: 440
+                        }
+                    ]
+                },
+                {
+                    background: './assets/Siete.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 3',
+                            position: [50, 50],
+                            width: 280
+                        },
+                        {
+                                content: "6 de febrero de 2026\nLa nave despegó al amanecer.\nEl astronauta miró por la ventana: la Tierra se volvió una esfera azul, luego una canica, luego un punto de luz.\n—No es un adiós, dijo. Es un \"hasta que arreglemos el cielo\".\nDurante el viaje, estudió el escudo, anillos gigantes y zonas invisibles alrededor de la Tierra donde quedan atrapadas pizcas del Sol.\n—Son como escudos protectores, pensó. Pero si hay una tormenta muy fuerte, algunas llegan hasta nosotros.\nIlustración sugerida:\nEl astronauta mirando la Tierra desde su nave, con líneas que muestran los cinturones de Van Allen alrededor del planeta.",
+                            position: [30, 80],
+                            width: 360
+                        },
+                        {
+                            content: '',
+                            position: [30, 340],
+                            width: 320
+                        }
+                    ]
+                },
+                {
+                    background: './assets/cuatro.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 4',
+                            position: [50, 50],
+                            width: 250
+                        },
+                        {
+                                content: "3 de agosto de 2026\n¡Llegaron al GOES-U!\nEl satélite estaba cubierto de porciones solares, como si tuviera una manta invisible.\nEl astronauta explicó:\n—El clima espacial no solo crea auroras… también afecta a la gente en la Tierra.\n• Los agricultores: Usan GPS para guiar tractores. Cuando hay tormentas solares, los tractores se pierden.\n• Los pilotos: Reciben más radiación en vuelos cerca de los polos.\n• Los operadores eléctricos: Sufren apagones cuando las tormentas solares afectan las redes.\nIlustración sugerida:\nEl astronauta reparando el satélite. En el fondo, se ve la Tierra con luces verdes brillando cerca de los polos (auroras).",
+                            position: [30, 80],
+                            width: 350
+                        }
+                    ]
+                },
+                {
+                    background: './assets/cinco.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 5',
+                            position: [50, 50],
+                            width: 270
+                        },
+                        {
+                            content: "7 de enero de 2027\nMientras reparaba, el astronauta vio algo increíble:\n—¡Una explosión solar! —exclamó.\nEra una nube gigante de magnetismo que el Sol había lanzado hacia el espacio.\n—No nos afectó, suspiró. Pero desde aquí arriba, vi las auroras boreales. ¡Son como un baile de luces entre el Sol y la Tierra!\nTambién observó los rayos cósmicos, partículas que viajan desde lejos, como mensajeros del universo.\n—El espacio no es vacío, murmuró. Está lleno de energía, luz y sorpresas.\n💡 ¿Sabías que?\nLas auroras ocurren cuando las partículas solares chocan con los gases de la atmósfera terrestre.\nEn el hemisferio norte se llaman auroras boreales; en el sur, auroras australes.",
+                            position: [30, 70],
+                            width: 340
+                        },
+                        {
+                            content: 'Belleza y caos entrelazados en el vacío.',
+                            position: [30, 340],
+                            width: 300
+                        }
+                    ]
+                },
+                {
+                    background: './assets/chetitos.jpg',
+                    texts: [
+                        {
+                            content: 'Capitulo 6',
+                            position: [50, 50],
+                            width: 280
+                        },
+                        {
+                               content: "17 de diciembre de 2026\nEl astronauta escribió en su diario:\n—El clima espacial está traspasando nuestra atmósfera, llegando a afectar a los agricultores. Las tormentas solares causan errores en los sistemas de navegación como el GPS. Esto resulta en retrasos en la siembra y cosecha.\n—Las tripulaciones de aerolíneas en regiones polares reciben más radiación. Los operadores eléctricos sufren interrupciones en el suministro de energía.\n—Siempre pensamos que el clima espacial no nos afectaría. ¡Qué equivocados estábamos!\nIlustración sugerida:\nUn granjero con un tractor perdido por GPS, un avión volando cerca del polo norte, y una ciudad con luces parpadeando por un apagón.",
+                            position: [30, 70],
+                            width: 360
+                        }
+                    ]
+                }
+            ],
+            // Página extra para manejar el caso impar
+            extraPage: {
+                background: '',
+                texts: [
+                    
+                ]
+            }
+            
+        };
+
+        let currentPage = 0;
+        let showingCover = true;
+
+        function showCover() {
+            const leftPage = document.querySelector('.left-page');
+            const rightPage = document.querySelector('.right-page');
+            
+            leftPage.classList.add('hidden');
+            rightPage.classList.remove('hidden');
+            
+            document.getElementById('rightBackground').style.backgroundImage = `url(${bookData.cover})`;
+            document.getElementById('rightBackground').style.opacity = '0.8';
+            document.getElementById('rightContent').querySelectorAll('.text-item').forEach(el => el.remove());
+            document.getElementById('rightPageNumber').textContent = '';
+            
+            rightPage.style.cursor = 'pointer';
+        }
+
+        function renderPages() {
+            showingCover = false;
+            document.getElementById('rightBackground').style.opacity = '0.2';
+            
+            const leftPage = document.querySelector('.left-page');
+            const rightPage = document.querySelector('.right-page');
+            
+            leftPage.classList.remove('hidden');
+            rightPage.classList.remove('hidden');
+            
+            // Página izquierda
+            const leftData = bookData.pages[currentPage];
+            document.getElementById('leftBackground').style.backgroundImage = `url(${leftData.background})`;
+            
+            const leftContent = document.getElementById('leftContent');
+            leftContent.querySelectorAll('.text-item').forEach(el => el.remove());
+            
+            leftData.texts.forEach(text => {
+                const textElement = document.createElement('div');
+                textElement.className = 'text-item';
+                textElement.textContent = text.content;
+                textElement.style.left = text.position[0] + 'px';
+                textElement.style.top = text.position[1] + 'px';
+                if (text.width) {
+                    textElement.style.width = text.width + 'px';
+                    textElement.style.maxWidth = text.width + 'px';
+                }
+                leftContent.appendChild(textElement);
+            });
+
+            document.getElementById('leftPageNumber').textContent = currentPage + 1;
+
+            // Página derecha
+            if (currentPage + 1 < bookData.pages.length) {
+                const rightData = bookData.pages[currentPage + 1];
+                document.getElementById('rightBackground').style.backgroundImage = `url(${rightData.background})`;
+                
+                const rightContent = document.getElementById('rightContent');
+                rightContent.querySelectorAll('.text-item').forEach(el => el.remove());
+                
+                rightData.texts.forEach(text => {
+                    const textElement = document.createElement('div');
+                    textElement.className = 'text-item';
+                    textElement.textContent = text.content;
+                    textElement.style.left = text.position[0] + 'px';
+                    textElement.style.top = text.position[1] + 'px';
+                    if (text.width) {
+                        textElement.style.width = text.width + 'px';
+                        textElement.style.maxWidth = text.width + 'px';
+                    }
+                    rightContent.appendChild(textElement);
+                });
+
+                document.getElementById('rightPageNumber').textContent = currentPage + 2;
+            } else {
+                document.getElementById('rightBackground').style.backgroundImage = '';
+                document.getElementById('rightContent').querySelectorAll('.text-item').forEach(el => el.remove());
+                document.getElementById('rightPageNumber').textContent = '';
+            }
+        }
+
+        function nextPage() {
+            if (showingCover) {
+                renderPages();
+                return;
+            }
+            
+            if (currentPage < bookData.pages.length - 2) {
+                currentPage += 2;
+                renderPages();
+            }
+        }
+
+        function previousPage() {
+            if (showingCover) return;
+            
+            if (currentPage > 0) {
+                currentPage -= 2;
+                renderPages();
+            } else {
+                currentPage = 0;
+                showingCover = true;
+                showCover();
+            }
+        }
+
+        showCover();
+    </script>
+
+    <footer>
+        <p style="position: fixed; bottom: 10px; left: 10px; color: #8a9dc9; font-size: 12px; opacity: 0.5;">
+            &copy; 2025 Aprendamos en el espacio. Todos los derechos reservados.
+        </p>
+    </footer>
+</body>
+</html>
